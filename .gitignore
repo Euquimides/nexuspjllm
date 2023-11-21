@@ -1,0 +1,13 @@
+# Ignore directories #
+#####################
+/bin
+/include
+/lib
+/lib64
+/share
+
+# Ignore files #
+################
+*.cfg
+*.bin
+*.keep

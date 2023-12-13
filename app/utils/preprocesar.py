@@ -1,5 +1,6 @@
-from langchain.text_splitter import RecursiveCharacterTextSplitter
 import re
+
+from langchain.text_splitter import RecursiveCharacterTextSplitter
 
 """
     Funciones para partir texto en chunks y preprocesarlos

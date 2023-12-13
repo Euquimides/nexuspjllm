@@ -5,9 +5,14 @@
 /lib
 /lib64
 /share
+/app/chroma_db
+/chunks
+/logs
+/app/utils/__pycache__
 
 # Ignore files #
 ################
 *.cfg
 *.bin
 *.keep
+.idea

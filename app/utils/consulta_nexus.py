@@ -1,7 +1,9 @@
-from logs import logger
-import requests
 import json
 import sys
+
+import requests
+
+from .logs import logger
 
 """
     Este módulo contiene la función para consultar la API de NEXUS PJ
@@ -20,9 +22,9 @@ def consulta_nexus(palabras_clave):
             "nq": "",
             "advanced": False,
             "facets": [],
-            "size": 10,
+            "size": 20,
             "page": 1,
-            "sort": {"field": "contenidosInteresOrden", "order": "desc"},
+            "sort": {"field": "_score", "order": "desc"},
             "exp": "",
         }
 
@@ -30,7 +32,7 @@ def consulta_nexus(palabras_clave):
         headers = {"Content-Type": "application/json"}
 
         # Realiza la consulta a la API de NEXUS PJ
-        response = requests.post(url, headers=headers, data=json.dumps(params))
+        response = requests.post(url, headers=headers, data=json.dumps(params), verify=False)
 
         # Convierte la respuesta de la API de NEXUS PJ en un diccionario
         response = response.json()

@@ -50,4 +50,5 @@ La aplicación le brindará varias opciones a utilizar las cuales se explican a 
 ### TODO
 - [ ] Refactorizar ya que algunas secciones son legacy code.
 - [ ] Agregar una interfaz gráfica en Gradio, NextJS u framework.
-- [ ] Cambiar a un gestor de paquetes más sólido como por ejemplo Poetry. 
+- [ ] Cambiar a un gestor de paquetes más sólido como por ejemplo Poetry.
+- [ ] Agregar archivos de configuración.

@@ -18,15 +18,21 @@ Luego, descargue **Ollama** (https://ollama.com/) para poder utilizar modelos gr
 
 Inicialice primero el servidor de **Ollama** con el modelo de lenguaje que desea utilizar, con las configuraciones sea por defecto o personalizadas. Esto puede hacerlo a través del comando en su termina.
 
-```ollama serve```
+```bash
+ollama serve
+```
 
 Descargue el modelo que vaya a utilizar de la página de  **Ollama**, por ejemolo, para Llama3.2 utilice el siguiente comando:
 
-```ollama run llama3.2```
+```bash
+ollama run llama3.2
+```
 
 A continuación, debe ejecutar el archivo `app/main.py` con Python 3.7+.
 
-```python app/main.py```
+```bash
+python app/main.py
+```
 
 La aplicación le brindará varias opciones a utilizar las cuales se explican a continuación:
 1. **Consulta a NexusPJ y extracción de jurisprudencia relacionada**: Esta opción le permite realizar una consulta al API de NexusPJ y extraer jurisprudencia relevante a un tema específico. Para esto, debe ingresar el tema de interés. La aplicación le mostrará los documentos extraídos y los guardará en un archivo de texto plano.
@@ -42,6 +48,6 @@ La aplicación le brindará varias opciones a utilizar las cuales se explican a 
 * No se garantiza el funcionamiento de la API de NexusPJ por tratarse de un servicio externo a cargo del Poder Judicial de Costa Rica, por lo que la aplicación puede dejar de funcionar en cualquier momento.
 
 ### TODO
-- [] Refactorizar ya que algunas secciones son legacy code.
-- [] Agregar una interfaz gráfica en Gradio, NextJS u framework.
-- [] Cambiar a un gestor de paquetes más sólido como por ejemplo Poetry. 
+- [ ] Refactorizar ya que algunas secciones son legacy code.
+- [ ] Agregar una interfaz gráfica en Gradio, NextJS u framework.
+- [ ] Cambiar a un gestor de paquetes más sólido como por ejemplo Poetry. 

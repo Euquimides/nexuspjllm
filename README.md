@@ -42,6 +42,6 @@ La aplicación le brindará varias opciones a utilizar las cuales se explican a 
 * No se garantiza el funcionamiento de la API de NexusPJ por tratarse de un servicio externo a cargo del Poder Judicial de Costa Rica, por lo que la aplicación puede dejar de funcionar en cualquier momento.
 
 ### TODO
-- [] Refactorizar ya que algunas secciones son legacy code.
-- [] Agregar una interfaz gráfica en Gradio, NextJS u framework.
-- [] Cambiar a un gestor de paquetes más sólido como por ejemplo Poetry. 
+- [ ] Refactorizar ya que algunas secciones son legacy code.
+- [ ] Agregar una interfaz gráfica en Gradio, NextJS u framework.
+- [ ] Cambiar a un gestor de paquetes más sólido como por ejemplo Poetry. 

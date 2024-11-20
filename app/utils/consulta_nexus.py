@@ -22,7 +22,7 @@ def consulta_nexus(palabras_clave):
             "nq": "",
             "advanced": False,
             "facets": [],
-            "size": 20,
+            "size": 10,
             "page": 1,
             "sort": {"field": "_score", "order": "desc"},
             "exp": "",

@@ -1,20 +1,21 @@
 import os
 import sys
 import uuid
+import openai
 
 import chromadb
 import keybert
-from llama_index import VectorStoreIndex, ServiceContext
-from llama_index.embeddings import HuggingFaceEmbedding
-from llama_index.indices.postprocessor import SentenceTransformerRerank
-from llama_index.indices.query.schema import QueryBundle
-from llama_index.llms import OpenAI
-from llama_index.prompts import PromptTemplate
-from llama_index.response_synthesizers import ResponseMode, get_response_synthesizer
-from llama_index.retrievers import VectorIndexRetriever
-from llama_index.schema import TextNode
-from llama_index.storage.storage_context import StorageContext
-from llama_index.vector_stores import ChromaVectorStore
+from llama_index.core.indices.vector_store import VectorStoreIndex, VectorIndexRetriever
+from llama_index.core.postprocessor import SentenceTransformerRerank
+from llama_index.core.prompts import PromptTemplate
+from llama_index.core.response_synthesizers import get_response_synthesizer, ResponseMode, Accumulate
+from llama_index.core.schema import TextNode
+from llama_index.core.storage import StorageContext
+from llama_index.core.settings import Settings
+from llama_index.legacy import QueryBundle, ServiceContext
+from llama_index.embeddings.ollama import OllamaEmbedding
+from llama_index.llms.ollama import Ollama
+from llama_index.vector_stores.chroma import ChromaVectorStore
 
 from .consulta_nexus import consulta_nexus
 from .logs import logger
@@ -30,19 +31,22 @@ from .preprocesar import split
     - sintetizador_respuesta: sintetiza una respuesta con base en la consulta y los nodos extraídos.
 """
 
+# Define la llave de la API de OpenAI
+os.environ["OPENAI_API_KEY"] = "nokey"
+openai.api_key = os.getenv("OPENAI_API_KEY")
+
 # Define el nombre del modelo
-modelo = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
+modelo = "llama3.2"
 
 # Crea una instancia del modelo de embeddings
-embedding_model = HuggingFaceEmbedding(model_name=modelo)
+embedding_model = OllamaEmbedding(model_name="nomic-embed-text")
+
+# Configure global settings
+Settings.embed_model = embedding_model
+Settings.chunk_size = 512
 
 # Crea una instancia del modelo de lenguaje
-llm = OpenAI(model="gpt-3.5-turbo", api_key="NULL", api_base="http://localhost:1234/v1")
-
-# Define el Servicio de Contexto
-servicio_de_contexto = ServiceContext.from_defaults(
-    embed_model=embedding_model, llm=llm
-)
+llm = Ollama(model=modelo, request_timeout=120.0)
 
 # Define un nuevo prompt en español
 qa_prompt_tmpl_es_str = """\
@@ -51,7 +55,7 @@ qa_prompt_tmpl_es_str = """\
     {context_str}
     ---------------------
     Dada la información de contexto y sin conocimiento previo, responde a la consulta en el lenguaje español. \
-    Sea conciso en su respuesta.
+    Sea conciso en su respuesta. Si no conoce la respuesta no responda. \
     Consulta: {query_str}
     Respuesta: \
     """
@@ -174,7 +178,10 @@ def indexar(nodes):
     # Creamos el vector store
     vector_store = ChromaVectorStore(chroma_collection=client_collection)
     storage_context = StorageContext.from_defaults(vector_store=vector_store)
-    service_context = servicio_de_contexto
+    service_context = ServiceContext.from_defaults(
+        llm=llm,
+        embed_model=embedding_model
+    )
 
     # Creamos el índice
     index = VectorStoreIndex(
@@ -192,23 +199,34 @@ def indexar(nodes):
 
 # Función para buscar nodos
 def buscar_nodos(
-    consulta, index, vector_top_k=int, reranker_top_n=None, with_reranker_sbert=False
+        consulta, index, vector_top_k=int, reranker_top_n=None, with_reranker_sbert=False
 ):
     # Informamos que la búsqueda ha iniciado
     logger.info("Iniciando búsqueda...")
-    query_bundle = QueryBundle(consulta)
+    
+    # Create query bundle using the core QueryBundle
+    query = QueryBundle(query_str=consulta)
+    
     # Se configura el retriever
-    retriever = VectorIndexRetriever(index=index, similarity_top_k=vector_top_k)
-    retrieved_nodes = retriever.retrieve(query_bundle)
+    retriever = VectorIndexRetriever(
+        index=index,
+        similarity_top_k=vector_top_k
+    )
+    
+    # Retrieve nodes using query string directly
+    retrieved_nodes = retriever.retrieve(str(consulta))
+    
     # Se configura el reranker
     if with_reranker_sbert:
         reranker = SentenceTransformerRerank(
-            model="nreimers/mmarco-mMiniLMv2-L12-H384-v1", top_n=reranker_top_n
+            top_n=reranker_top_n,
+            model="cross-encoder/ms-marco-MiniLM-L-2-v2"
         )
-        retrieved_nodes = reranker.postprocess_nodes(retrieved_nodes, query_bundle)
-    # Informamos que la búsqueda ha finalizado
-    logger.info("Búsqueda finalizada")
-    # Retornamos los nodos
+        retrieved_nodes = reranker.postprocess_nodes(
+            retrieved_nodes,
+            query_bundle=query
+        )
+    
     return retrieved_nodes
 
 
@@ -252,18 +270,17 @@ def guardar_nodos(retrieved_nodes):
             f.write("\n")
 
 
-# Función para sintetizar una respuesta usando un modelo de lenguaje
 def sintetizador_respuesta(consulta, retrieved_nodes):
     # Se configura el sintetizador de respuestas
     response_synthesizer = get_response_synthesizer(
+        llm=llm,
+        text_qa_template=qa_prompt_tmpl_es,
         response_mode=ResponseMode.COMPACT,
-        verbose=True,
-        service_context=servicio_de_contexto,
     )
     # Se actualiza el prompt
     response_synthesizer.update_prompts({"text_qa_template": qa_prompt_tmpl_es})
     # Se configura la respuesta
-    respuesta = response_synthesizer.synthesize(consulta, retrieved_nodes)
+    respuesta = response_synthesizer.synthesize(query=consulta, nodes=retrieved_nodes, use_async=False, streaming=False)
     # Retornamos la respuesta
     return respuesta
 
@@ -273,15 +290,21 @@ def get_index():
     # Creamos o obtenemos un cliente y una nueva colección
     client = chromadb.PersistentClient(path="./app/chroma_db")
     client_collection = client.get_or_create_collection("sentencias")
+
     # Creamos el vector store
     vector_store = ChromaVectorStore(chroma_collection=client_collection)
     storage_context = StorageContext.from_defaults(vector_store=vector_store)
-    service_context = servicio_de_contexto
+    service_context = ServiceContext.from_defaults(
+        llm=llm,
+        embed_model=embedding_model
+    )
+
     # Cargamos el índice
     index = VectorStoreIndex.from_vector_store(
         vector_store=vector_store,
         service_context=service_context,
         storage_context=storage_context,
     )
+
     # Retornamos el índice
     return index

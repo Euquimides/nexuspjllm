@@ -1,208 +1,168 @@
 import os
-
 from utils.ingerir import *
 from utils.logs import logger
+import time
 
-"""
-Este módulo contiene el código principal de la aplicación. Incluye la lógica para la interacción con el usuario.
-"""
+class NexusPJLLM:
+    def __init__(self):
+        self.index = None
+        self.timing_data = []
+        logger.info("NexusPJLLM app iniciada")
 
-# Informamos del inicio de la app
-logger.info("NexusPJLLM app iniciada")
-# Inicializamos el index como None
-index = None
+    def imprimir_opciones(self):
+        options = {
+            "1": "Consulta a NexusPJ y extracción de jurisprudencia relacionada",
+            "2": "Generación inteligente de respuestas con base a jurisprudencia extraída",
+            "3": "Top 3 de jurisprudencia más relevante según consulta a base de datos",
+            "4": "Salir"
+        }
+        print("\nSeleccione una opción:")
+        for key, value in options.items():
+            print(f"{key}. {value}")
+        print()
 
+    def verificar_base_datos(self):
+        if not os.path.exists("./app/chroma_db"):
+            print("Debe ingerir la jurisprudencia primero. Seleccione la opción 1.")
+            return False
+        return True
 
-def imprimir_opciones():
-    # Imprimimos las siguientes opciones
-    print("Seleccione una opción:")
-    print("1. Consulta a NexusPJ y extracción de jurisprudencia relacionada")
-    print("2. Generación inteligente de respuestas con base a jurisprudencia extraída")
-    print("3. Top 3 de jurisprudencia más relevante según consulta a base de datos")
-    print("4. Salir")
-    print("")
+    def procesar_consulta(self, consulta, reranker=False):
+        try:
+            start_time = time.time()
+            if not self.index:
+                self.index = get_index()
+            
+            retrieved_nodes = buscar_nodos(
+                consulta,
+                self.index,
+                vector_top_k=20,
+                reranker_top_n=3,
+                with_reranker_sbert=reranker
+            )
+            elapsed_time = time.time() - start_time
+            self.timing_data.append({"operation": "procesar_consulta", "time": elapsed_time})
+            return retrieved_nodes
+        except Exception as e:
+            logger.error(f"Error al procesar consulta: {str(e)}")
+            raise
 
-
-try:
-    # Damos un mensaje de bienvenida
-    print("Bienvenido a NexusPJLLM")
-    print("")
-    # Imprimimos las opciones
-    imprimir_opciones()
-    # Solicitamos la opción al usuario
-    opcion = input("Ingrese una opción: ")
-    print("")
-    # Mientras la opción no sea 3, se ejecuta el programa
-    while opcion != "4":
-        # Si la opción es 1, se ejecuta la consulta inteligente
-        if opcion == "1":
-            while True:
-                # Solicitamos la consulta al usuario
-                consulta = input(
-                    "Ingrese su consulta sobre un tema jurídico particular (por ejemplo, derecho laboral): "
-                )
-                # Extraemos los nodos de jurisprudencia de NEXUS PJ
+    def opcion_1(self):
+        while True:
+            try:
+                consulta = input("\nIngrese su consulta sobre un tema jurídico particular: ")
+                start_time = time.time()
+                
                 nodes = extractor(consulta, embedding_model)
-                # Indexamos los nodos
-                index = indexar(nodes)
-                # Buscamos los nodos y extraemos los top 20
-                retrieved_nodes = buscar_nodos(
-                    consulta,
-                    index,
-                    vector_top_k=20,
-                    reranker_top_n=3,
-                    with_reranker_sbert=False,
-                )
-                # Imprimimos los nodos
+                self.index = indexar(nodes)
+                retrieved_nodes = self.procesar_consulta(consulta)
+                
                 imprimir_nodos(retrieved_nodes)
-                # Guardamos los nodos en un archivo de texto
                 guardar_nodos(retrieved_nodes)
-                # Informamos que se terminó la indexación y guardado de nodos
-                logger.info(
-                    "Indexación y guardado de nodos finalizado. Base de datos vectorial en ./app/chroma_db"
-                )
-                print("")
-                # Preguntamos si el usuario desea realizar otra consulta
-                opcion = input("¿Desea realizar otra consulta? (S/N): ").lower()
-                print("")
-                # Si la respuesta es "n", se sale del ciclo
-                if opcion == "n":
+                
+                elapsed_time = time.time() - start_time
+                self.timing_data.append({"operation": "opcion_1", "time": elapsed_time})
+                logger.info(f"Indexación y guardado de nodos finalizado en {elapsed_time:.2f} segundos")
+                
+                if not self.continuar_consulta():
                     break
-                # Si la respuesta es "s", se continúa con el ciclo
-                elif opcion == "s":
-                    continue
-                # Si la respuesta no es "s" o "n", se solicita de nuevo
-                else:
-                    # Solicitamos la opción al usuario
-                    opcion = input("Opción inválida. Responda sí o no (S/N): ").lower()
-                    print("")
-            # Volvemos a imprimir las opciones
-            imprimir_opciones()
-            # Solicitamos la opción al usuario
-            opcion = input("Ingrese una opción: ")
-        # Si la opción es 2, se ejecuta el chatbot
-        elif opcion == "2":
-            # Revisamos que exista una base de datos de chroma
-            if not os.path.exists("./app/chroma_db"):
-                # Informamos al usuario que debe ingerir la jurisprudencia
-                print(
-                    "Debe ingerir la jurisprudencia primero. Seleccione la opción 1 para iniciar con su primera consulta o 3 para salir."
-                )
-                print("")
-                # Imprimimos las opciones
-                imprimir_opciones()
-                # Solicitamos la opción al usuario
-                opcion = input("Ingrese una opción: ")
-            else:
-                while True:
-                    # Solicitamos la consulta al usuario
-                    consulta = input("Ingrese su consulta: ")
-                    # Obtenemos el índice
-                    index = get_index()
-                    # Buscamos los nodos
-                    retrieved_nodes = buscar_nodos(
-                        consulta,
-                        index,
-                        vector_top_k=20,
-                        reranker_top_n=3,
-                        with_reranker_sbert=True,
-                    )
-                    # Imprimimos los nodos
-                    imprimir_nodos(retrieved_nodes)
-                    # Informamos del inicio de la síntesis de respuesta
-                    logger.info(
-                        "Iniciando síntesis de respuesta. Esto tomará unos minutos..."
-                    )
-                    # Sintetizar respuesta
-                    respuesta = sintetizador_respuesta(consulta, retrieved_nodes)
-                    # Imprimir la consulta de forma amigable
-                    print("--------------------------------------------------")
-                    print("Su consulta fue:")
-                    print(consulta)
-                    print("--------------------------------------------------")
-                    # Imprimir respuesta de forma amigable
-                    print("Respuesta generada:")
-                    print(respuesta)
-                    print("--------------------------------------------------")
-                    print("")
-                    # Informamos del fin de la síntesis de respuesta
-                    logger.info("Síntesis de respuesta finalizada")
-                    print("")
-                    # Preguntamos si el usuario desea realizar otra consulta
-                    opcion = input("¿Desea realizar otra consulta? (S/N): ").lower()
-                    print("")
-                    # Si la respuesta es "n", se sale del ciclo
-                    if opcion == "n":
-                        break
-                    # Si la respuesta es "s", se continúa con el ciclo
-                    elif opcion == "s":
-                        continue
-            # Volvemos a imprimir las opciones
-            imprimir_opciones()
-            # Solicitamos la opción al usuario
-            opcion = input("Ingrese una opción: ")
-        elif opcion == "3":
-            # Revisamos que exista una base de datos de chroma
-            if not os.path.exists("./app/chroma_db"):
-                # Informamos al usuario que debe ingerir la jurisprudencia
-                print(
-                    "Debe ingerir la jurisprudencia primero. Seleccione la opción 1 para iniciar con su primera consulta o 3 para salir."
-                )
-                print("")
-                # Imprimimos las opciones
-                imprimir_opciones()
-                # Solicitamos la opción al usuario
-                opcion = input("Ingrese una opción: ")
-            else:
-                while True:
-                    # Solicitamos la consulta al usuario
-                    consulta = input("Ingrese su consulta: ")
-                    # Obtenemos el índice
-                    index = get_index()
-                    # Buscamos los nodos
-                    retrieved_nodes = buscar_nodos(
-                        consulta,
-                        index,
-                        vector_top_k=20,
-                        reranker_top_n=3,
-                        with_reranker_sbert=True,
-                    )
-                    # Imprimir la consulta de forma amigable
-                    print("--------------------------------------------------")
-                    print("Su consulta fue:")
-                    print(consulta)
-                    print("--------------------------------------------------")
-                    # Imprimir respuesta de forma amigable
-                    print("Top 3 de jurisprudencia más relevante:")
-                    # Imprimimos los nodos
-                    imprimir_nodos(retrieved_nodes)
-                    print("--------------------------------------------------")
-                    print("")
-                    # Guardamos los nodos en un archivo de texto
-                    guardar_nodos(retrieved_nodes)
-                    # Preguntamos si el usuario desea realizar otra consulta
-                    opcion = input("¿Desea realizar otra consulta? (S/N): ").lower()
-                    print("")
-                    # Si la respuesta es "n", se sale del ciclo
-                    if opcion == "n":
-                        break
-                    # Si la respuesta es "s", se continúa con el ciclo
-                    elif opcion == "s":
-                        continue
-            # Volvemos a imprimir las opciones
-            imprimir_opciones()
-            # Solicitamos la opción al usuario
-            opcion = input("Ingrese una opción: ")
-        # Si la opción no es 1, 2 o 3, se solicita de nuevo
-        elif opcion != "1" and opcion != "2" and opcion != "3" and opcion != "4":
-            # Solicitamos la opción al usuario
-            opcion = input("Ingrese una opción válida: ")
-            print("")
+            except Exception as e:
+                logger.error(f"Error en opción 1: {str(e)}")
+                print(f"Ocurrió un error: {str(e)}")
 
-    pass
-except Exception as e:
-    # Informamos del error
-    logger.error("Error: " + str(e))
-finally:
-    # Informamos del fin de la app
-    logger.info("NexusPJLLM app finalizada")
+    def opcion_2(self):
+        if not self.verificar_base_datos():
+            return
+
+        while True:
+            try:
+                consulta = input("\nIngrese su consulta: ")
+                start_time = time.time()
+                
+                retrieved_nodes = self.procesar_consulta(consulta, reranker=True)
+                imprimir_nodos(retrieved_nodes)
+                logger.info("Iniciando síntesis de respuesta...")
+                
+                respuesta = sintetizador_respuesta(consulta, retrieved_nodes)
+                
+                elapsed_time = time.time() - start_time
+                self.timing_data.append({"operation": "opcion_2", "time": elapsed_time})
+                logger.info(f"Respuesta generada en {elapsed_time:.2f} segundos")
+                
+                self.mostrar_resultado(consulta, respuesta)
+                
+                if not self.continuar_consulta():
+                    break
+            except Exception as e:
+                logger.error(f"Error en opción 2: {str(e)}")
+                print(f"Ocurrió un error: {str(e)}")
+
+    def opcion_3(self):
+        if not self.verificar_base_datos():
+            return
+
+        while True:
+            try:
+                consulta = input("\nIngrese su consulta: ")
+                start_time = time.time()
+                
+                retrieved_nodes = self.procesar_consulta(consulta, reranker=True)
+                
+                elapsed_time = time.time() - start_time
+                self.timing_data.append({"operation": "opcion_3", "time": elapsed_time})
+                logger.info(f"Búsqueda completada en {elapsed_time:.2f} segundos")
+                
+                self.mostrar_resultado(consulta, None, retrieved_nodes)
+                guardar_nodos(retrieved_nodes)
+                
+                if not self.continuar_consulta():
+                    break
+            except Exception as e:
+                logger.error(f"Error en opción 3: {str(e)}")
+                print(f"Ocurrió un error: {str(e)}")
+
+    def continuar_consulta(self):
+        while True:
+            opcion = input("\n¿Desea realizar otra consulta? (S/N): ").lower()
+            if opcion in ['s', 'n']:
+                return opcion == 's'
+            print("Opción inválida. Responda S o N.")
+
+    def mostrar_resultado(self, consulta, respuesta=None, nodes=None):
+        print("\n" + "-" * 50)
+        print(f"Su consulta fue:\n{consulta}")
+        print("-" * 50)
+        
+        if respuesta:
+            print(f"Respuesta generada:\n{respuesta}")
+        if nodes:
+            print("Top 3 de jurisprudencia más relevante:")
+            imprimir_nodos(nodes)
+        print("-" * 50 + "\n")
+
+    def ejecutar(self):
+        try:
+            print("Bienvenido a NexusPJLLM\n")
+            opciones = {"1": self.opcion_1, "2": self.opcion_2, "3": self.opcion_3}
+            
+            while True:
+                self.imprimir_opciones()
+                opcion = input("Ingrese una opción: ")
+                
+                if opcion == "4":
+                    break
+                elif opcion in opciones:
+                    opciones[opcion]()
+                else:
+                    print("Opción inválida. Intente nuevamente.")
+                    
+        except Exception as e:
+            logger.error(f"Error general: {str(e)}")
+            print(f"Error inesperado: {str(e)}")
+        finally:
+            logger.info("NexusPJLLM app finalizada")
+            logger.info(f"Timing data: {self.timing_data}")
+
+if __name__ == "__main__":
+    app = NexusPJLLM()
+    app.ejecutar()

@@ -10,19 +10,21 @@ Para mayor privacidad, la aplicación - fuera de la consulta a la API - está co
 
 Para instalar la aplicación, se debe clonar el repositorio y crear un entorno virtual con Python 3.7+. Luego, se debe instalar las dependencias del archivo `requirements.txt`.
 
-```pip install -r requirements.txt```
+```bash
+pip install -r requirements.txt
+```
 
 Luego, descargue **Ollama** (https://ollama.com/) para poder utilizar modelos grandes de lenguaje de manera local con la aplicación. Ésta aplicación ha sido probada principalmene con el modelo Llama3.2 `https://ollama.com/library/llama3.2`, dado a que está optimizado para correr en computación edge, por lo que se recomienda su uso.
 
 ### Uso
 
-Inicialice primero el servidor de **Ollama** con el modelo de lenguaje que desea utilizar, con las configuraciones sea por defecto o personalizadas. Esto puede hacerlo a través del comando en su termina.
+Inicialice primero el servidor de **Ollama** con el modelo de lenguaje que desea utilizar, con las configuraciones sea por defecto o personalizadas. Esto puede hacerlo a través del comando en su terminal.
 
 ```bash
 ollama serve
 ```
 
-Descargue el modelo que vaya a utilizar de la página de  **Ollama**, por ejemolo, para Llama3.2 utilice el siguiente comando:
+Descargue el modelo que vaya a utilizar de la página de  **Ollama**, por ejemplo, para Llama3.2 utilice el siguiente comando:
 
 ```bash
 ollama run llama3.2

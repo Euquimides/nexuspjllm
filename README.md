@@ -1,5 +1,7 @@
 # NEXUSPJLLM
 
+https://github.com/user-attachments/assets/76258c7f-d7d3-4b23-b132-c4b47c3391e4
+
 ### Descripción
 
 **NEXUSPJLLM** es una aplicación creada en Python que a través de la API de **NexusPJ** (https://nexuspj.poder-judicial.go.cr/), permite obtener jurisprudencia relevante a un tema específico e insumos legales útiles para juristas y abogados, esto por medio del uso de técnicas modernas de aprendizaje automático.

@@ -1,0 +1,56 @@
+# docker-compose.yml
+version: "3.8"
+
+services:
+  backend:
+    build: ./backend
+    container_name: nexuspj_backend
+    ports:
+      - "8000:8000"
+    environment:
+      - OLLAMA_HOST=http://host.docker.internal:11434
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - PYTHONPATH=/app
+    volumes:
+      - ./backend:/app
+      - ./backend/chroma_db:/app/chroma_db
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+      - "host.docker.internal:172.17.0.1" # Alternative for Linux systems
+    networks:
+      - app_network
+    command: python -m uvicorn app.api.base_api:app --host 0.0.0.0 --port 8000 --reload
+
+  frontend:
+    build: ./nexuspj-ui
+    container_name: nexuspj_frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    volumes:
+      - ./nexuspj-ui:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+    networks:
+      - app_network
+
+  ollama:
+    image: ollama/ollama:latest
+    network_mode: "service:backend"
+    volumes:
+      - ollama_data:/root/.ollama # Persist Ollama data
+      - ./entrypoint.sh:/entrypoint.sh
+    container_name: ollama
+    pull_policy: always # Always pull the latest image
+    tty: true # Allocate pseudo-TTY
+    entrypoint: ["usr/bin/bash", "/entrypoint.sh"] # Run custom entrypoint script
+
+networks:
+  app_network:
+    driver: bridge
+
+volumes:
+  ollama_data: # Define named volume for Ollama data

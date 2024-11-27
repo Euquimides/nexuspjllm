@@ -1,0 +1,73 @@
+2024-11-26 23:08:55 - NexusPJLLM - INFO - NexusPJLLM app iniciada
+2024-11-26 23:24:33 - NexusPJLLM - INFO - NexusPJLLM app iniciada
+2024-11-26 23:25:16 - NexusPJLLM - ERROR - Error al realizar la consulta a NEXUS PJ. Error: <class 'requests.exceptions.JSONDecodeError'>
+Traceback (most recent call last):
+  File "C:\Users\jcvas\AppData\Local\pypoetry\Cache\virtualenvs\nexuspjllm-dENOHAkA-py3.12\Lib\site-packages\requests\models.py", line 974, in json
+    return complexjson.loads(self.text, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\jcvas\AppData\Local\pypoetry\Cache\virtualenvs\nexuspjllm-dENOHAkA-py3.12\Lib\site-packages\simplejson\__init__.py", line 514, in loads
+    return _default_decoder.decode(s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\jcvas\AppData\Local\pypoetry\Cache\virtualenvs\nexuspjllm-dENOHAkA-py3.12\Lib\site-packages\simplejson\decoder.py", line 386, in decode
+    obj, end = self.raw_decode(s)
+               ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\jcvas\AppData\Local\pypoetry\Cache\virtualenvs\nexuspjllm-dENOHAkA-py3.12\Lib\site-packages\simplejson\decoder.py", line 416, in raw_decode
+    return self.scan_once(s, idx=_w(s, idx).end())
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+simplejson.errors.JSONDecodeError: Expecting value: line 2 column 1 (char 2)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\jcvas\Documents\Development\nexuspjllm\backend\app\utils\consulta_nexus.py", line 38, in consulta_nexus
+    response = response.json()
+               ^^^^^^^^^^^^^^^
+  File "C:\Users\jcvas\AppData\Local\pypoetry\Cache\virtualenvs\nexuspjllm-dENOHAkA-py3.12\Lib\site-packages\requests\models.py", line 978, in json
+    raise RequestsJSONDecodeError(e.msg, e.doc, e.pos)
+requests.exceptions.JSONDecodeError: Expecting value: line 2 column 1 (char 2)
+
+2024-11-26 23:25:16 - NexusPJLLM - INFO - Consulta a NEXUS PJ: derecho a la legitima defensa
+2024-11-26 23:25:16 - NexusPJLLM - ERROR - Error: <class 'TypeError'>
+Traceback (most recent call last):
+  File "C:\Users\jcvas\Documents\Development\nexuspjllm\backend\app\utils\ingerir.py", line 134, in extractor
+    for hit in response["hits"]:
+               ~~~~~~~~^^^^^^^^
+TypeError: 'NoneType' object is not subscriptable
+
+2024-11-26 23:27:15 - NexusPJLLM - INFO - NexusPJLLM app iniciada
+2024-11-26 23:27:18 - NexusPJLLM - ERROR - Error al realizar la consulta a NEXUS PJ. Error: <class 'requests.exceptions.JSONDecodeError'>
+Traceback (most recent call last):
+  File "C:\Users\jcvas\AppData\Local\pypoetry\Cache\virtualenvs\nexuspjllm-dENOHAkA-py3.12\Lib\site-packages\requests\models.py", line 974, in json
+    return complexjson.loads(self.text, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\jcvas\AppData\Local\pypoetry\Cache\virtualenvs\nexuspjllm-dENOHAkA-py3.12\Lib\site-packages\simplejson\__init__.py", line 514, in loads
+    return _default_decoder.decode(s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\jcvas\AppData\Local\pypoetry\Cache\virtualenvs\nexuspjllm-dENOHAkA-py3.12\Lib\site-packages\simplejson\decoder.py", line 386, in decode
+    obj, end = self.raw_decode(s)
+               ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\jcvas\AppData\Local\pypoetry\Cache\virtualenvs\nexuspjllm-dENOHAkA-py3.12\Lib\site-packages\simplejson\decoder.py", line 416, in raw_decode
+    return self.scan_once(s, idx=_w(s, idx).end())
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+simplejson.errors.JSONDecodeError: Expecting value: line 2 column 1 (char 2)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\jcvas\Documents\Development\nexuspjllm\backend\app\utils\consulta_nexus.py", line 38, in consulta_nexus
+    response = response.json()
+               ^^^^^^^^^^^^^^^
+  File "C:\Users\jcvas\AppData\Local\pypoetry\Cache\virtualenvs\nexuspjllm-dENOHAkA-py3.12\Lib\site-packages\requests\models.py", line 978, in json
+    raise RequestsJSONDecodeError(e.msg, e.doc, e.pos)
+requests.exceptions.JSONDecodeError: Expecting value: line 2 column 1 (char 2)
+
+2024-11-26 23:27:18 - NexusPJLLM - INFO - Consulta a NEXUS PJ: derecho a la legitima defensa
+2024-11-26 23:27:18 - NexusPJLLM - ERROR - Error: <class 'TypeError'>
+Traceback (most recent call last):
+  File "C:\Users\jcvas\Documents\Development\nexuspjllm\backend\app\utils\ingerir.py", line 134, in extractor
+    for hit in response["hits"]:
+               ~~~~~~~~^^^^^^^^
+TypeError: 'NoneType' object is not subscriptable
+
+2024-11-26 23:28:07 - NexusPJLLM - INFO - NexusPJLLM app iniciada
+2024-11-26 23:28:33 - NexusPJLLM - INFO - NexusPJLLM app iniciada

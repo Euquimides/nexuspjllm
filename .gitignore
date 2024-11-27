@@ -9,6 +9,8 @@
 /chunks
 /logs
 /app/utils/__pycache__
+/backend/chroma_db
+/node_modules
 
 # Ignore files #
 ################
@@ -16,3 +18,4 @@
 *.bin
 *.keep
 .idea
+__pycache__

@@ -5,12 +5,13 @@
 /lib
 /lib64
 /share
-/app/chroma_db
 /chunks
-/logs
+backend/chunks
+backend/logs/*
 /app/utils/__pycache__
-/backend/chroma_db
 /node_modules
+backend/chroma_db/*
+backend/chunks/*
 
 # Ignore files #
 ################
@@ -19,3 +20,46 @@
 *.keep
 .idea
 __pycache__
+
+# Python #
+##########
+*.py[cod]
+*.pyo
+*.pyd
+*.env
+*.venv
+env/
+venv/
+ENV/
+VENV/
+*.egg
+*.egg-info
+dist/
+build/
+*.manifest
+*.spec
+
+# Jupyter Notebooks #
+#####################
+.ipynb_checkpoints
+
+# macOS #
+#########
+.DS_Store
+
+# Windows #
+###########
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Logs and databases #
+######################
+*.log
+*.sql
+*.sqlite
+
+# VS Code #
+###########
+.vscode/

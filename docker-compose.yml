@@ -16,6 +16,7 @@ services:
       - ./backend/chroma_db:/app/chroma_db
     extra_hosts:
       - "host.docker.internal:host-gateway"
+      - "host.docker.internal:172.17.0.1" # Alternative for Linux systems
     networks:
       - app_network
     command: python -m uvicorn app.api.base_api:app --host 0.0.0.0 --port 8000 --reload
@@ -40,11 +41,16 @@ services:
     image: ollama/ollama:latest
     network_mode: "service:backend"
     volumes:
-      - ollama_data:/root/.ollama  # Persist Ollama data
+      - ollama_data:/root/.ollama # Persist Ollama data
+      - ./entrypoint.sh:/entrypoint.sh
+    container_name: ollama
+    pull_policy: always # Always pull the latest image
+    tty: true # Allocate pseudo-TTY
+    entrypoint: ["usr/bin/bash", "/entrypoint.sh"] # Run custom entrypoint script
 
 networks:
   app_network:
     driver: bridge
 
 volumes:
-  ollama_data:  # Define named volume for Ollama data
+  ollama_data: # Define named volume for Ollama data
